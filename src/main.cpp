@@ -33,29 +33,25 @@ AS5600 ASL; //  use default Wire
 #define NUM_STEPS 6
 
 const int MOSFETS[NUM_MOSFETS] = {PHASE_U_SOURCE, PHASE_V_SOURCE, PHASE_W_SOURCE, PHASE_U_DRAIN, PHASE_V_DRAIN, PHASE_W_DRAIN};
-const bool INVERTED[NUM_MOSFETS] = {true, true, true, false, false, false};
 
-void write_mosfet(int pin, float duty_cycle, bool inverted)
+void write_mosfet(int pin, float duty_cycle)
 {
-  if (!inverted)
-    analogWrite(pin, (int)(duty_cycle * 4095.0));
-  else
     analogWrite(pin, (int)((1 - duty_cycle) * 4095.0));
 }
 
-void write_coils(float u, float v, float w)
-{
-  if (u > 0)
-  {
-    analogWrite(PHASE_U_SOURCE, (int)(u * 4095.0));
-    analogWrite(PHASE_V_DRAIN, (int)(u * 4095.0));
-  }
-  else
-  {
-    analogWrite(PHASE_V_SOURCE, (int)(u * 4095.0));
-    analogWrite(PHASE_U_DRAIN, (int)(u * 4095.0));
-  }
-}
+// void write_coils(float u, float v, float w)
+// {
+//   if (u > 0)
+//   {
+//     analogWrite(PHASE_U_SOURCE, (int)(u * 4095.0));
+//     analogWrite(PHASE_V_DRAIN, (int)(u * 4095.0));
+//   }
+//   else
+//   {
+//     analogWrite(PHASE_V_SOURCE, (int)(u * 4095.0));
+//     analogWrite(PHASE_U_DRAIN, (int)(u * 4095.0));
+//   }
+// }
 
 void setup()
 {
@@ -68,11 +64,7 @@ void setup()
   for (int i = 0; i < NUM_MOSFETS; i++)
   {
     pinMode(MOSFETS[i], OUTPUT);
-
-    if (INVERTED[i])
-      analogWrite(MOSFETS[i], 4095);
-    else
-      analogWrite(MOSFETS[i], 0);
+    write_mosfet(MOSFETS[i], 0);
   }
 
   Serial.begin(115200);
@@ -103,7 +95,11 @@ void loop()
   //   run_coil_state(STEPS[step]);
   // }
 
+  delay(1000);
+  Serial.print(millis());
+  Serial.print("\t");
   Serial.println(ASL.rawAngle() * AS5600_RAW_TO_DEGREES);
+  Serial.flush();
 }
 
 //  -- END OF FILE --
